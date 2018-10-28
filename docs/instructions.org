@@ -1,0 +1,279 @@
+#+title: Setting up a React project
+#+property: header-args  :eval never-export
+#+property: header-args+ :results value org
+#+property: header-args+ :exports both
+#+property: header-args+ :dir ../
+
+* Setting up a React project
+
+Initializing the NPM project
+
+#+BEGIN_SRC shell :tangle yes
+  npm init --yes
+#+END_SRC
+
+
+Install React.
+
+#+BEGIN_SRC shell :tangle yes
+  npm install react react-dom
+#+END_SRC
+
+Install webpack.
+
+#+BEGIN_SRC shell :tangle yes :exports code
+  npm install -D webpack webpack-dev-server webpack-cli
+#+END_SRC
+
+#+BEGIN_SRC shell :tangle yes
+  mkdir -p public
+  touch public/index.html
+#+END_SRC
+
+Create an =index.html= file.
+
+#+BEGIN_SRC html :tangle ../public/index.html
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8"/>
+      <title>Document</title>
+    </head>
+    <body>
+      <div id="root"></div>
+      <script src="main.js" type="text/javascript"></script>
+    </body>
+  </html>
+#+END_SRC
+
+Add a NPM start script.
+
+#+BEGIN_SRC shell
+  cat package.json | jq .scripts
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC org
+{
+  "start": "webpack-dev-server",
+  "test": "echo \"Error: no test specified\" && exit 1"
+}
+#+END_SRC
+
+Install =babel=.
+
+#+BEGIN_SRC shell :tangle yes :exports code
+  npm install -D @babel/core @babel/preset-react
+#+END_SRC
+
+Configure =webpack= to use babel.
+
+#+BEGIN_SRC shell
+  cat webpack.config.js
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC org
+const path = require('path');
+
+const config = {
+  entry: ['./src/index.js'],
+
+  module: {
+    rules: [
+      {
+        test: /\.jsx?/,
+        loaders: ['babel-loader'],
+        exclude: /node_modules/,
+      },
+    ],
+  },
+};
+
+module.exports = config;
+#+END_SRC
+
+Install the =babel-loader= webpack plugin.
+
+#+BEGIN_SRC shell :tangle yes :exports code
+  npm install -D babel-loader
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC org
++ babel-loader@8.0.4
+added 14 packages from 11 contributors and audited 8229 packages in 4.833s
+found 0 vulnerabilities
+
+#+END_SRC
+
+Add babel configuration to =package.json=.
+
+#+BEGIN_SRC shell
+  cat package.json | jq .babel
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC org
+{
+  "presets": [
+    "@babel/preset-react"
+  ]
+}
+#+END_SRC
+
+Load the =index.html= page.
+
+#+BEGIN_SRC shell :tangle yes :exports code
+  npm install -D html-webpack-plugin
+#+END_SRC
+
+Add the plugin to the =webpack.config.js= file.
+
+#+BEGIN_SRC javascript
+  {
+    //...
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: './public/index.html',
+        filename: './index.html',
+      }),
+    ]
+  }
+#+END_SRC
+
+
+Handle CSS with =post-css=.
+
+#+BEGIN_SRC shell :tangle yes :exports code
+  npm install -D \
+      style-loader \
+      css-loader \
+      precss \
+      postcss-loader
+#+END_SRC
+
+Add a rule in =webpack.config.js= for handling CSS files.
+
+#+BEGIN_SRC shell
+  node -p "
+    require('./webpack.config.js')
+      .module
+      .rules
+      .find((r) => r.test.exec('is.css'))
+  "
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC org
+{ test: /\.css$/,
+  use:
+   [ 'style-loader',
+     { loader: 'css-loader', options: [Object] },
+     'postcss-loader' ] }
+#+END_SRC
+
+And setup postcss in =package.json=.
+
+#+BEGIN_SRC shell
+  cat package.json | jq .postcss
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC org
+{
+  "map": false,
+  "plugins": {
+    "postcss-import": {},
+    "postcss-preset-env": {
+      "stage": 3
+    }
+  }
+}
+#+END_SRC
+
+Now we install the postcss plugins.
+
+#+BEGIN_SRC shell :tangle yes :exports code
+  npm install -D postcss-import postcss-preset-env
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC org
++ postcss-import@12.0.1
++ postcss-preset-env@6.2.0
+added 107 packages from 54 contributors, updated 24 packages, moved 2 packages and audited 9372 packages in 11.092s
+found 0 vulnerabilities
+
+#+END_SRC
+
+Now we setup a eslint configuration.
+
+#+BEGIN_SRC shell :tangle yes :exports code
+  npm install -D eslint
+#+END_SRC
+
+#+BEGIN_SRC shell
+  cat .eslintrc.json
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC org
+{
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "react"
+  ],
+  "rules": {
+    "indent": [
+      "error",
+      2
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ]
+  }
+}
+#+END_SRC
+
+And prettier.
+
+#+BEGIN_SRC shell :tangle yes :exports code
+  npm install -D prettier
+#+END_SRC
+
+#+BEGIN_SRC shell
+  cat .prettierrc
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC org
+{
+  "tabWidth": 2,
+  "singleQuote": true,
+  "printWidth": 100,
+  "trailingComma": "es5",
+  "semi": true,
+  "arrowParens": "always"
+}
+#+END_SRC

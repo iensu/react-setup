@@ -1,0 +1,26 @@
+npm init --yes
+
+npm install react react-dom
+
+npm install -D webpack webpack-dev-server webpack-cli
+
+mkdir -p public
+touch public/index.html
+
+npm install -D @babel/core @babel/preset-react
+
+npm install -D babel-loader
+
+npm install -D html-webpack-plugin
+
+npm install -D \
+    style-loader \
+    css-loader \
+    precss \
+    postcss-loader
+
+npm install -D postcss-import postcss-preset-env
+
+npm install -D eslint
+
+npm install -D prettier
